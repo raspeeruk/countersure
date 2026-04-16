@@ -1,10 +1,12 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
+import { PlanButton } from '@/components/PlanButton';
 
 export const metadata: Metadata = {
   title: 'Pricing',
   description:
     'Countersure pricing — free VAT checks, Pro at £19/month for branded PDFs and bulk, Team at £49/month for watchlists, API at £199/month.',
+  alternates: { canonical: '/pricing' },
 };
 
 const TIERS = [
@@ -15,6 +17,7 @@ const TIERS = [
     summary: 'Casual checks. No signup.',
     features: ['5 single checks per day', 'Live HMRC verification', 'Result page with Stamp'],
     cta: { label: 'Run a check →', href: '/check-vat-number' },
+    plan: null as null,
     accent: false,
   },
   {
@@ -29,7 +32,8 @@ const TIERS = [
       'CSV export',
       'Email support',
     ],
-    cta: { label: 'Start Pro', href: '/signup?plan=pro' },
+    cta: { label: 'Start Pro' },
+    plan: 'cs_pro' as const,
     accent: true,
   },
   {
@@ -44,7 +48,8 @@ const TIERS = [
       'Webhook events',
       'Priority support',
     ],
-    cta: { label: 'Start Team', href: '/signup?plan=team' },
+    cta: { label: 'Start Team' },
+    plan: 'cs_team' as const,
     accent: false,
   },
   {
@@ -59,7 +64,8 @@ const TIERS = [
       'SLA-backed uptime',
       'Direct integration support',
     ],
-    cta: { label: 'Start API', href: '/signup?plan=api' },
+    cta: { label: 'Start API' },
+    plan: 'cs_api' as const,
     accent: false,
   },
 ];
@@ -103,16 +109,20 @@ export default function PricingPage() {
                   <li key={f}>{f}</li>
                 ))}
               </ul>
-              <Link
-                href={tier.cta.href}
-                className={`mt-auto block text-center px-5 py-3 font-sans font-bold uppercase tracking-wider text-sm transition-colors ${
-                  tier.accent
-                    ? 'bg-stamp-red text-clearance-white hover:bg-stamp-red-deep'
-                    : 'bg-customs-green text-clearance-white hover:bg-customs-green-deep'
-                }`}
-              >
-                {tier.cta.label}
-              </Link>
+              {tier.plan ? (
+                <PlanButton
+                  plan={tier.plan}
+                  label={tier.cta.label}
+                  variant={tier.accent ? 'red' : 'green'}
+                />
+              ) : (
+                <Link
+                  href={tier.cta.href ?? '/check-vat-number'}
+                  className="mt-auto block text-center px-5 py-3 font-sans font-bold uppercase tracking-wider text-sm transition-colors bg-customs-green text-clearance-white hover:bg-customs-green-deep"
+                >
+                  {tier.cta.label}
+                </Link>
+              )}
             </div>
           ))}
         </div>
