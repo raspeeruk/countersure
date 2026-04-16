@@ -16,6 +16,9 @@ export function Header() {
           <Link href="/check-vat-number" className="text-slate-ink hover:text-customs-green">
             VAT Check
           </Link>
+          <Link href="/bulk" className="text-slate-ink hover:text-customs-green">
+            Bulk
+          </Link>
           <Link href="/use-cases" className="text-slate-ink hover:text-customs-green">
             Use cases
           </Link>

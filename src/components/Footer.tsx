@@ -16,6 +16,7 @@ export function Footer() {
           </div>
           <ul className="space-y-2 font-body text-sm">
             <li><Link href="/check-vat-number" className="hover:text-customs-green">VAT check</Link></li>
+            <li><Link href="/bulk" className="hover:text-customs-green">Bulk check</Link></li>
             <li><Link href="/eori-check" className="hover:text-customs-green">EORI check</Link></li>
             <li><Link href="/companies-house-lookup" className="hover:text-customs-green">Companies House</Link></li>
             <li><Link href="/api-docs" className="hover:text-customs-green">API</Link></li>
