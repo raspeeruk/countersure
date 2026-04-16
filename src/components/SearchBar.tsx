@@ -3,7 +3,13 @@
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 
-export function SearchBar({ placeholder = 'GB123456789' }: { placeholder?: string }) {
+export function SearchBar({
+  placeholder = 'GB123456789',
+  variant: _variant = 'default',
+}: {
+  placeholder?: string;
+  variant?: 'default' | 'hero';
+}) {
   const [value, setValue] = useState('');
   const router = useRouter();
 
