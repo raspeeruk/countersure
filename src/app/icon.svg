@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <rect width="64" height="64" fill="#FAFBF9"/>
+  <g transform="translate(32 32) rotate(-7)">
+    <circle r="26" fill="none" stroke="#B23A28" stroke-width="2"/>
+    <circle r="20" fill="none" stroke="#B23A28" stroke-width="1" opacity="0.4"/>
+    <text text-anchor="middle" y="6" font-family="ui-monospace, monospace" font-weight="700" font-size="14" fill="#B23A28">CS</text>
+  </g>
+</svg>
