@@ -128,13 +128,22 @@ export default async function CheckPage({ params }: PageProps) {
               and API access. From £19/month.
             </p>
           </div>
-          <div className="md:col-span-5 flex md:justify-end gap-4">
-            <Link
-              href="/pricing"
-              className="bg-customs-green text-clearance-white px-6 py-3 font-sans font-bold uppercase tracking-wider text-sm hover:bg-customs-green-deep"
-            >
-              See plans
-            </Link>
+          <div className="md:col-span-5 flex md:justify-end flex-wrap gap-4">
+            {result.ok ? (
+              <a
+                href={`/api/vat/${result.vatNumber}/pdf`}
+                className="bg-stamp-red text-clearance-white px-6 py-3 font-sans font-bold uppercase tracking-wider text-sm hover:bg-stamp-red/90"
+              >
+                Download stamped PDF →
+              </a>
+            ) : (
+              <Link
+                href="/pricing"
+                className="bg-customs-green text-clearance-white px-6 py-3 font-sans font-bold uppercase tracking-wider text-sm hover:bg-customs-green-deep"
+              >
+                See plans
+              </Link>
+            )}
             <Link
               href="/"
               className="border border-slate-ink/20 text-slate-ink px-6 py-3 font-sans font-bold uppercase tracking-wider text-sm hover:bg-clearance-white"
