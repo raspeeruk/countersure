@@ -15,6 +15,51 @@
 const PRODUCTION_BASE = 'https://api.service.hmrc.gov.uk';
 const SANDBOX_BASE = 'https://test-api.service.hmrc.gov.uk';
 
+// In-memory token cache (serverless: one per cold start, fine for short-lived functions)
+let cachedToken: { token: string; expiresAt: number } | null = null;
+
+/**
+ * Get a Bearer token via OAuth client_credentials grant.
+ * HMRC issues tokens valid for ~4 hours.
+ */
+async function getAccessToken(): Promise<string | null> {
+  // Prefer a static server token if provided
+  const serverToken = process.env.HMRC_SERVER_TOKEN;
+  if (serverToken) return serverToken;
+
+  const clientId = process.env.HMRC_CLIENT_ID;
+  const clientSecret = process.env.HMRC_CLIENT_SECRET;
+  if (!clientId || !clientSecret) return null;
+
+  // Return cached token if still valid (with 60s buffer)
+  if (cachedToken && Date.now() < cachedToken.expiresAt - 60_000) {
+    return cachedToken.token;
+  }
+
+  const base = getBase();
+  const res = await fetch(`${base}/oauth/token`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: new URLSearchParams({
+      grant_type: 'client_credentials',
+      client_id: clientId,
+      client_secret: clientSecret,
+    }),
+  });
+
+  if (!res.ok) {
+    console.error('HMRC token exchange failed:', res.status, await res.text());
+    return null;
+  }
+
+  const data = await res.json();
+  cachedToken = {
+    token: data.access_token,
+    expiresAt: Date.now() + (data.expires_in ?? 14400) * 1000,
+  };
+  return cachedToken.token;
+}
+
 export interface VatLookupAddress {
   line1?: string;
   line2?: string;
@@ -50,14 +95,8 @@ export interface VatLookupError {
 export type VatLookupResponse = VatLookupResult | VatLookupNotFound | VatLookupError;
 
 function getBase(): string {
-  return process.env.HMRC_USE_SANDBOX === 'true' ? SANDBOX_BASE : PRODUCTION_BASE;
-}
-
-function getAuthHeader(): string | null {
-  // For the Check VAT Number API, an application server token issued by HMRC
-  // is sufficient. In sandbox the API responds without auth for testing.
-  const token = process.env.HMRC_SERVER_TOKEN;
-  return token ? `Bearer ${token}` : null;
+  return process.env.HMRC_API_BASE
+    ?? (process.env.HMRC_USE_SANDBOX === 'true' ? SANDBOX_BASE : PRODUCTION_BASE);
 }
 
 /**
@@ -97,8 +136,8 @@ export async function lookupVatNumber(vatNumber: string): Promise<VatLookupRespo
   const headers: HeadersInit = {
     Accept: 'application/vnd.hmrc.2.0+json',
   };
-  const auth = getAuthHeader();
-  if (auth) headers.Authorization = auth;
+  const token = await getAccessToken();
+  if (token) headers.Authorization = `Bearer ${token}`;
 
   try {
     const res = await fetch(url, { headers, cache: 'no-store' });
