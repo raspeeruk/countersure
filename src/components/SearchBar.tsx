@@ -6,9 +6,13 @@ import { useState } from 'react';
 export function SearchBar({
   placeholder = 'GB123456789',
   variant: _variant = 'default',
+  action = '/check',
+  label = 'VAT №',
 }: {
   placeholder?: string;
   variant?: 'default' | 'hero';
+  action?: string;
+  label?: string;
 }) {
   const [value, setValue] = useState('');
   const router = useRouter();
@@ -19,13 +23,13 @@ export function SearchBar({
     if (!cleaned) return;
     // Strip GB prefix if present for the URL
     const num = cleaned.startsWith('GB') ? cleaned.slice(2) : cleaned;
-    router.push(`/check/${num}`);
+    router.push(`${action}/${num}`);
   }
 
   return (
     <form onSubmit={handleSubmit} className="flex w-full max-w-2xl">
       <div className="flex items-center bg-customs-green-deep px-4 font-mono text-clearance-white text-sm">
-        VAT №
+        {label}
       </div>
       <input
         type="text"

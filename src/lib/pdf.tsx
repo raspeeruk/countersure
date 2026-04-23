@@ -269,6 +269,7 @@ export type StampDoc = {
   vatNumber: string;
   countryCode: string;
   status: 'verified' | 'flagged' | 'not_found' | 'error';
+  type?: 'vat' | 'eori';
   name?: string;
   address?: {
     line1?: string;
@@ -288,13 +289,16 @@ export function VerificationPdf({ doc }: { doc: StampDoc }) {
   const checkedAtFormatted = new Date(doc.checkedAt).toUTCString();
   const isVerified = doc.status === 'verified';
   const isFlagged = doc.status === 'flagged';
+  const isEori = doc.type === 'eori';
+  const typeLabel = isEori ? 'EORI' : 'VAT NUMBER';
+  const registerLabel = isEori ? 'HMRC EORI register' : 'HMRC VAT register';
 
   return (
     <Document
-      title={`Countersure verification ${doc.verificationId}`}
+      title={`Countersure ${isEori ? 'EORI' : 'VAT'} verification ${doc.verificationId}`}
       author="Countersure"
-      subject="UK VAT verification"
-      keywords="VAT verification, HMRC, audit trail, supplier verification"
+      subject={`UK ${isEori ? 'EORI' : 'VAT'} verification`}
+      keywords={`${isEori ? 'EORI' : 'VAT'} verification, HMRC, audit trail, supplier verification`}
     >
       <Page size="A4" style={styles.page}>
         <View style={styles.topBar} />
@@ -303,10 +307,10 @@ export function VerificationPdf({ doc }: { doc: StampDoc }) {
         <Text style={styles.brandRight}>UK SUPPLIER VERIFICATION</Text>
 
         <View style={styles.header}>
-          <Text style={styles.sectionLabel}>§ VAT NUMBER VERIFICATION</Text>
+          <Text style={styles.sectionLabel}>§ {typeLabel} VERIFICATION</Text>
           <Text style={styles.h1}>Verification certificate</Text>
           <Text style={styles.sub}>
-            Issued by Countersure against the live HMRC VAT register on {checkedAtFormatted}.
+            Issued by Countersure against the live {registerLabel} on {checkedAtFormatted}.
           </Text>
         </View>
 
@@ -332,10 +336,9 @@ export function VerificationPdf({ doc }: { doc: StampDoc }) {
             </View>
 
             <View style={styles.metaBlock}>
-              <Text style={styles.metaLabel}>§ VAT NUMBER</Text>
+              <Text style={styles.metaLabel}>§ {typeLabel}</Text>
               <Text style={styles.metaValue}>
-                {doc.countryCode}
-                {doc.vatNumber}
+                {isEori ? doc.vatNumber : `${doc.countryCode}${doc.vatNumber}`}
               </Text>
             </View>
 
@@ -360,7 +363,7 @@ export function VerificationPdf({ doc }: { doc: StampDoc }) {
 
           <View style={styles.stampWrap}>
             <StampSvg
-              countryCode={doc.countryCode}
+              countryCode={isEori ? 'EORI' : doc.countryCode}
               number={doc.vatNumber}
               date={dateLabel}
             />
