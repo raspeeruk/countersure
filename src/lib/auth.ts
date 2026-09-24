@@ -3,8 +3,9 @@ import Resend from 'next-auth/providers/resend';
 import { DrizzleAdapter } from '@auth/drizzle-adapter';
 import { db, isDbAvailable } from '@/db';
 import { users, accounts, sessions, verificationTokens } from '@/db/schema';
+import { loginEmail } from './login-email';
 
-const FROM = process.env.AUTH_EMAIL_FROM || 'Countersure <noreply@siftforms.com>';
+const FROM = process.env.AUTH_EMAIL_FROM || 'Countersure <countersure@siftforms.com>';
 
 export const authConfig: NextAuthConfig = {
   trustHost: true,
@@ -23,6 +24,20 @@ export const authConfig: NextAuthConfig = {
         Resend({
           apiKey: process.env.RESEND_API_KEY,
           from: FROM,
+          async sendVerificationRequest({ identifier, url, expires, provider }) {
+            const response = await fetch('https://api.resend.com/emails', {
+              method: 'POST',
+              headers: { Authorization: `Bearer ${provider.apiKey}`, 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                from: provider.from,
+                to: [identifier],
+                reply_to: 'countersure@rogergroup.xyz',
+                ...loginEmail(url, expires),
+              }),
+              signal: AbortSignal.timeout(10_000),
+            });
+            if (!response.ok) throw new Error(`Login email failed (${response.status})`);
+          },
         }),
       ]
     : [],
