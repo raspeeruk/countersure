@@ -6,6 +6,7 @@ import {
   lookupVatNumber,
   normaliseVatNumber,
   generateVerificationId,
+  vatCheckStatusLabel,
 } from '@/lib/hmrc';
 
 // Render on demand, cache for 24h
@@ -67,7 +68,7 @@ export default async function CheckPage({ params }: PageProps) {
             ) : (
               <>
                 <h1 className="font-sans font-black text-4xl md:text-6xl tracking-tight leading-tight mb-6">
-                  Check failed.
+                  {result.status === 400 ? 'Check failed.' : 'Temporarily unavailable.'}
                 </h1>
                 <p className="font-body text-clearance-white/85 max-w-xl">
                   {result.message}
@@ -106,8 +107,8 @@ export default async function CheckPage({ params }: PageProps) {
             <Cell label="Checked at" value={new Date().toUTCString()} mono />
             <Cell
               label="Status"
-              value={result.ok ? 'VERIFIED' : result.reason === 'not_found' ? 'NOT REGISTERED' : 'ERROR'}
-              status={result.ok ? 'verified' : 'rejected'}
+              value={vatCheckStatusLabel(result)}
+              status={result.ok ? 'verified' : result.reason === 'not_found' ? 'rejected' : 'flagged'}
             />
           </div>
         </div>
